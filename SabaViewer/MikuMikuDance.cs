@@ -21,7 +21,7 @@ public unsafe class MikuMikuDance : IDisposable
 
     private MMDModel? model;
     private VmdAnimation? animation;
-
+    
     private uint posVBO;
     private uint norVBO;
     private uint uvVBO;
@@ -53,6 +53,9 @@ public unsafe class MikuMikuDance : IDisposable
     public bool EnablePhysical { get; set; } = true;
 
     public bool EnableShadow { get; set; } = true;
+    public uint FrameCount { get; set; } = 0;
+    public bool isLoop { get; set; } = true;
+    public string AnimPath { get; set; } = string.Empty;
 
     public MikuMikuDance(GL gl, string modelPath, string? vmdPath = null)
     {
@@ -79,7 +82,16 @@ public unsafe class MikuMikuDance : IDisposable
             {
                 elapsedTime = 1.0f / 30.0f;
             }
+            
+            if (animTime * 30.0f > FrameCount+20 && isLoop)
+            {
+                uint frameCount = 0;
+                animation.Load("Resources/大喜/动作数据/god.json".FormatFilePath(), model,out frameCount);
+                FrameCount = frameCount;
+                animTime = 0;
 
+
+            }
             if (IsPlaying)
             {
                 animTime += elapsedTime;
@@ -89,6 +101,7 @@ public unsafe class MikuMikuDance : IDisposable
             {
                 elapsed = elapsedTime;
             }
+
             else
             {
                 elapsed = 0.0f;
@@ -160,6 +173,7 @@ public unsafe class MikuMikuDance : IDisposable
                 {
                     continue;
                 }
+
                 _gl.SetUniform(_mmdShader.UniAmbinet, mmdMat.Ambient);
                 _gl.SetUniform(_mmdShader.UniDiffuse, mmdMat.Diffuse);
                 _gl.SetUniform(_mmdShader.UniSpecular, mmdMat.Specular);
@@ -251,7 +265,8 @@ public unsafe class MikuMikuDance : IDisposable
                 _gl.SetUniform(_mmdShader.UniShadowMap2, 5);
                 _gl.SetUniform(_mmdShader.UniShadowMap3, 6);
 
-                _gl.DrawElements(GLEnum.Triangles, mesh.VertexCount, GLEnum.UnsignedInt, (void*)(mesh.BeginIndex * sizeof(uint)));
+                _gl.DrawElements(GLEnum.Triangles, mesh.VertexCount, GLEnum.UnsignedInt,
+                    (void*)(mesh.BeginIndex * sizeof(uint)));
 
                 _gl.ActiveTexture(TextureUnit.Texture0 + 0);
                 _gl.BindTexture(GLEnum.Texture2D, 0);
@@ -296,7 +311,8 @@ public unsafe class MikuMikuDance : IDisposable
                 _gl.SetUniform(_mmdEdgeShader.UniEdgeSize, mmdMat.EdgeSize);
                 _gl.SetUniform(_mmdEdgeShader.UniEdgeColor, mmdMat.EdgeColor);
 
-                _gl.DrawElements(GLEnum.Triangles, mesh.VertexCount, GLEnum.UnsignedInt, (void*)(mesh.BeginIndex * sizeof(uint)));
+                _gl.DrawElements(GLEnum.Triangles, mesh.VertexCount, GLEnum.UnsignedInt,
+                    (void*)(mesh.BeginIndex * sizeof(uint)));
             }
 
             _gl.BindVertexArray(0);
@@ -349,7 +365,8 @@ public unsafe class MikuMikuDance : IDisposable
                         continue;
                     }
 
-                    _gl.DrawElements(GLEnum.Triangles, mesh.VertexCount, GLEnum.UnsignedInt, (void*)(mesh.BeginIndex * sizeof(uint)));
+                    _gl.DrawElements(GLEnum.Triangles, mesh.VertexCount, GLEnum.UnsignedInt,
+                        (void*)(mesh.BeginIndex * sizeof(uint)));
                 }
 
                 _gl.BindVertexArray(0);
@@ -371,6 +388,7 @@ public unsafe class MikuMikuDance : IDisposable
             pair.Value.SpTexture?.Dispose();
             pair.Value.ToonTexture?.Dispose();
         }
+
         _materials.Clear();
 
         _gl.DeleteBuffer(posVBO);
@@ -399,8 +417,9 @@ public unsafe class MikuMikuDance : IDisposable
         if (!string.IsNullOrEmpty(vmdPath))
         {
             animation = new VmdAnimation();
-            animation.Load(vmdPath, model);
-
+            uint frame = FrameCount;
+            animation.Load(vmdPath, model, out frame);
+            FrameCount = frame;
             animation.SyncPhysics(0.0f);
         }
 
@@ -437,7 +456,8 @@ public unsafe class MikuMikuDance : IDisposable
 
         ibo = _gl.GenBuffer();
         _gl.BindBuffer(GLEnum.ElementArrayBuffer, ibo);
-        _gl.BufferData(GLEnum.ElementArrayBuffer, (uint)(sizeof(uint) * idxCount), model.GetIndices(), GLEnum.StaticDraw);
+        _gl.BufferData(GLEnum.ElementArrayBuffer, (uint)(sizeof(uint) * idxCount), model.GetIndices(),
+            GLEnum.StaticDraw);
         _gl.BindBuffer(GLEnum.ElementArrayBuffer, 0);
 
         // Setup MMD VAO

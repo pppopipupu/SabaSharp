@@ -191,10 +191,10 @@ public class VmdAnimation : IDisposable
         _ikControllers = [];
     }
 
-    public bool Load(string path, MMDModel model)
+    public bool Load(string path, MMDModel model, out uint MaxFrame)
     {
         Destroy();
-
+        MaxFrame = 0;
         Model = model;
         if (Path.GetExtension(path) == ".vmd")
         {
@@ -202,6 +202,14 @@ public class VmdAnimation : IDisposable
             if (vmd == null)
             {
                 return false;
+            }
+
+            foreach (var frame in vmd.Motions)
+            {
+                if (frame.Frame > MaxFrame)
+                {
+                    MaxFrame = frame.Frame;
+                }
             }
 
             foreach (IGrouping<string, VmdMotion> group in vmd.Motions.GroupBy(item => item.BoneName))
@@ -287,6 +295,14 @@ public class VmdAnimation : IDisposable
             if (vmd == null)
             {
                 return false;
+            }
+
+            foreach (var frame in vmd.Motions)
+            {
+                if (frame.Frame > MaxFrame)
+                {
+                    MaxFrame = frame.Frame;
+                }
             }
 
             foreach (IGrouping<string, JsonMotion> group in vmd.Motions.GroupBy(item => item.BoneName))

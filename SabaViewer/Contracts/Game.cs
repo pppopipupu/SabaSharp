@@ -158,15 +158,15 @@ public abstract unsafe class Game
 
             DrawHost();
 
-            ImGui.Begin("Info");
-            ImGui.Text(renderer);
-            ImGui.Value("FPS", ImGui.GetIO().Framerate);
-            ImGui.End();
-
-            ImGui.Begin("Settings");
-            ImGui.DragFloat("Camera Speed", ref cameraSpeed, 0.5f, 0.5f, 20.0f);
-            ImGui.DragFloat("Camera Sensitivity", ref cameraSensitivity, 0.2f, 0.2f, 10.0f);
-            ImGui.End();
+            // ImGui.Begin("Info");
+            // ImGui.Text(renderer);
+            // ImGui.Value("FPS", ImGui.GetIO().Framerate);
+            // ImGui.End();
+            //
+            // ImGui.Begin("Settings");
+            // ImGui.DragFloat("Camera Speed", ref cameraSpeed, 0.5f, 0.5f, 20.0f);
+            // ImGui.DragFloat("Camera Sensitivity", ref cameraSensitivity, 0.2f, 0.2f, 10.0f);
+            // ImGui.End();
 
             RenderImGui(obj);
 

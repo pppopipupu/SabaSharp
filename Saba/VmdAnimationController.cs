@@ -109,7 +109,6 @@ public class VmdNodeAnimationKey : VmdAnimationKey
     public VmdNodeAnimationKey(VmdMotion motion) : base((int)motion.Frame)
     {
         Translate = motion.Translate * new Vector3(1.0f, 1.0f, -1.0f);
-        Console.WriteLine(motion.Quaternion);
         Matrix4x4 rot0 = Matrix4x4.CreateFromQuaternion(motion.Quaternion);
         Matrix4x4 rot1 = rot0.InvZ();
         Rotate = Quaternion.CreateFromRotationMatrix(rot1);
@@ -123,7 +122,6 @@ public class VmdNodeAnimationKey : VmdAnimationKey
     public VmdNodeAnimationKey(JsonMotion motion) : base((int)motion.Frame)
     {
         Translate = motion.Translate * new Vector3(1.0f, 1.0f, -1.0f);
-        Console.WriteLine(motion.Quaternion);
         Matrix4x4 rot0 = Matrix4x4.CreateFromQuaternion(motion.Quaternion);
         Matrix4x4 rot1 = rot0.InvZ();
         Rotate = Quaternion.CreateFromRotationMatrix(rot1);

@@ -18,9 +18,22 @@ public class Scene1 : Game
 
     protected override void Load()
     {
-        _characterModels.Add(new MikuMikuDance(gl,
-            "Resources/大喜/模型/登门喜鹊泠鸢yousa-ver2.0/泠鸢yousa登门喜鹊153cm-Apose2.1完整版(2).pmx".FormatFilePath(),
-            "Resources/大喜/动作数据/lll.json".FormatFilePath()));
+        try
+        {
+            _characterModels.Add(new MikuMikuDance(gl,
+                "Resources/古明地こいしVer1.51/古明地こいしVer1.51.pmx".FormatFilePath(),
+                "Resources/大喜/动作数据/god.json".FormatFilePath()));
+            foreach (var mmd in _characterModels)
+            {
+                mmd.IsPlaying = true;
+                mmd.EnablePhysical = true;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Load MMD failed");
+            Console.WriteLine(e);
+        }
     }
 
     protected override void Render(double obj)
@@ -36,33 +49,33 @@ public class Scene1 : Game
 
     protected override void RenderImGui(double obj)
     {
-        ImGui.Begin("MMD");
+        // ImGui.Begin("MMD");
+        //
+        // Vector3 lightColor = MikuMikuDance.LightColor;
+        // ImGui.ColorEdit3(nameof(MikuMikuDance.LightColor), ref lightColor);
+        // MikuMikuDance.LightColor = lightColor;
+        //
+        // Vector4 shadowColor = MikuMikuDance.ShadowColor;
+        // ImGui.ColorEdit4(nameof(MikuMikuDance.ShadowColor), ref shadowColor);
+        // MikuMikuDance.ShadowColor = shadowColor;
+        //
+        // Vector3 lightDir = MikuMikuDance.LightDir;
+        // ImGui.DragFloat3(nameof(MikuMikuDance.LightDir), ref lightDir, 0.05f);
+        // MikuMikuDance.LightDir = lightDir;
 
-        Vector3 lightColor = MikuMikuDance.LightColor;
-        ImGui.ColorEdit3(nameof(MikuMikuDance.LightColor), ref lightColor);
-        MikuMikuDance.LightColor = lightColor;
-
-        Vector4 shadowColor = MikuMikuDance.ShadowColor;
-        ImGui.ColorEdit4(nameof(MikuMikuDance.ShadowColor), ref shadowColor);
-        MikuMikuDance.ShadowColor = shadowColor;
-
-        Vector3 lightDir = MikuMikuDance.LightDir;
-        ImGui.DragFloat3(nameof(MikuMikuDance.LightDir), ref lightDir, 0.05f);
-        MikuMikuDance.LightDir = lightDir;
-
-        ImGui_Button("Play / Pause", () => _characterModels.ForEach((mmd) => mmd.IsPlaying = !mmd.IsPlaying));
-
-        ImGui_Button("Enable physical",
-            () => _characterModels.ForEach((mmd) => mmd.EnablePhysical = !mmd.EnablePhysical));
-
-        ImGui.End();
-
-        ImGui.Begin("Transform");
-
-        ImGui.DragFloat3("Translate", ref translate, 0.01f);
-        ImGui.DragFloat3("Scale", ref scale, 0.01f);
-
-        ImGui.End();
+        // ImGui_Button("Play / Pause", () => _characterModels.ForEach((mmd) => mmd.IsPlaying = !mmd.IsPlaying));
+        //
+        // ImGui_Button("Enable physical",
+        //     () => _characterModels.ForEach((mmd) => mmd.EnablePhysical = !mmd.EnablePhysical));
+        //
+        // ImGui.End();
+        //
+        // ImGui.Begin("Transform");
+        //
+        // ImGui.DragFloat3("Translate", ref translate, 0.01f);
+        // ImGui.DragFloat3("Scale", ref scale, 0.01f);
+        //
+        // ImGui.End();
 
         if (isFirstFrame)
         {
@@ -81,7 +94,6 @@ public class Scene1 : Game
         {
             mmd.Translate = translate + new Vector3(-4.0f * index, 0.0f, -4.0f * index);
             mmd.Scale = scale;
-
             mmd.Update(time);
 
             index++;
