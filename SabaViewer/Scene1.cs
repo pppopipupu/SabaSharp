@@ -1,5 +1,7 @@
 ﻿using System.Numerics;
 using ImGuiNET;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Saba.Helpers;
 using SabaViewer.Contracts;
 using Silk.NET.OpenGLES;
@@ -17,12 +19,8 @@ public class Scene1 : Game
     protected override void Load()
     {
         _characterModels.Add(new MikuMikuDance(gl,
-                                               "Resources/大喜/模型/登门喜鹊泠鸢yousa-ver2.0/泠鸢yousa登门喜鹊153cm-Apose2.1完整版(2).pmx".FormatFilePath(),
-                                               "Resources/大喜/动作数据/大喜MMD动作数据-喜鹊泠鸢专用版.vmd".FormatFilePath()));
-
-        _characterModels.Add(new MikuMikuDance(gl,
-                                               "Resources/KizunaAI_ver1.01/kizunaai/kizunaai.pmx".FormatFilePath(),
-                                               "Resources/大喜/动作数据/大喜动作数据2.0配布修正滑步身体穿模等问题.vmd".FormatFilePath()));
+            "Resources/大喜/模型/登门喜鹊泠鸢yousa-ver2.0/泠鸢yousa登门喜鹊153cm-Apose2.1完整版(2).pmx".FormatFilePath(),
+            "Resources/大喜/动作数据/lll.json".FormatFilePath()));
     }
 
     protected override void Render(double obj)
@@ -54,7 +52,8 @@ public class Scene1 : Game
 
         ImGui_Button("Play / Pause", () => _characterModels.ForEach((mmd) => mmd.IsPlaying = !mmd.IsPlaying));
 
-        ImGui_Button("Enable physical", () => _characterModels.ForEach((mmd) => mmd.EnablePhysical = !mmd.EnablePhysical));
+        ImGui_Button("Enable physical",
+            () => _characterModels.ForEach((mmd) => mmd.EnablePhysical = !mmd.EnablePhysical));
 
         ImGui.End();
 

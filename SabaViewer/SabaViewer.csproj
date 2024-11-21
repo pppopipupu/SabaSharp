@@ -2,13 +2,14 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Silk.NET.Input" Version="2.20.0" />
 		<PackageReference Include="Silk.NET.OpenGLES" Version="2.20.0" />
 		<PackageReference Include="Silk.NET.OpenGLES.Extensions.EXT" Version="2.20.0" />

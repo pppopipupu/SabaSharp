@@ -4,6 +4,7 @@ using Saba.Helpers;
 namespace Saba;
 
 #region Classes
+
 public class VmdNodeController(MMDNode @object) : VmdAnimationController<VmdNodeAnimationKey, MMDNode>(@object)
 {
     public override void Evaluate(float t, float weight = 1.0f)
@@ -170,6 +171,7 @@ public class VmdIkController(MMDIkSolver @object) : VmdAnimationController<VmdIk
         }
     }
 }
+
 #endregion
 
 public class VmdAnimation : IDisposable
@@ -194,87 +196,177 @@ public class VmdAnimation : IDisposable
         Destroy();
 
         Model = model;
-
-        VmdParsing? vmd = VmdParsing.ParsingByFile(path);
-        if (vmd == null)
+        if (Path.GetExtension(path) == ".vmd")
         {
-            return false;
-        }
-
-        foreach (IGrouping<string, VmdMotion> group in vmd.Motions.GroupBy(item => item.BoneName))
-        {
-            MMDNode? node = Model.FindNode(item => item.Name == group.Key);
-
-            if (node == null)
+            VmdParsing? vmd = VmdParsing.ParsingByFile(path);
+            if (vmd == null)
             {
-                continue;
+                return false;
             }
 
-            VmdNodeController controller = new(node);
-
-            foreach (VmdMotion motion in group)
+            foreach (IGrouping<string, VmdMotion> group in vmd.Motions.GroupBy(item => item.BoneName))
             {
-                controller.AddKey(new VmdNodeAnimationKey(motion));
-            }
+                MMDNode? node = Model.FindNode(item => item.Name == group.Key);
 
-            controller.SortKeys();
-
-            _nodeControllers.Add(controller);
-        }
-
-        foreach (IGrouping<string, VmdMorph> group in vmd.Morphs.GroupBy(item => item.BlendShapeName))
-        {
-            MMDMorph? mmdMorph = Model.FindMorph(item => item.Name == group.Key);
-
-            if (mmdMorph == null)
-            {
-                continue;
-            }
-
-            VmdMorphController controller = new(mmdMorph);
-
-            foreach (VmdMorph morph in group)
-            {
-                controller.AddKey(new VmdMorphAnimationKey((int)morph.Frame, morph.Weight));
-            }
-
-            controller.SortKeys();
-
-            _morphControllers.Add(controller);
-        }
-
-        Dictionary<string, VmdIkController> ikCtrlMap = [];
-        foreach (VmdIk ik in vmd.Iks)
-        {
-            foreach (IGrouping<string, VmdIk.Info> ikInfo in ik.Infos.GroupBy(item => item.Name))
-            {
-                if (!ikCtrlMap.TryGetValue(ikInfo.Key, out VmdIkController? ikCtrl))
+                if (node == null)
                 {
-                    MMDIkSolver? mmdIk = Model.FindIkSolver(item => item.IkNode!.Name == ikInfo.Key);
+                    continue;
+                }
 
-                    if (mmdIk == null)
+                VmdNodeController controller = new(node);
+
+                foreach (VmdMotion motion in group)
+                {
+                    controller.AddKey(new VmdNodeAnimationKey(motion));
+                }
+
+                controller.SortKeys();
+
+                _nodeControllers.Add(controller);
+            }
+
+            foreach (IGrouping<string, VmdMorph> group in vmd.Morphs.GroupBy(item => item.BlendShapeName))
+            {
+                MMDMorph? mmdMorph = Model.FindMorph(item => item.Name == group.Key);
+
+                if (mmdMorph == null)
+                {
+                    continue;
+                }
+
+                VmdMorphController controller = new(mmdMorph);
+
+                foreach (VmdMorph morph in group)
+                {
+                    controller.AddKey(new VmdMorphAnimationKey((int)morph.Frame, morph.Weight));
+                }
+
+                controller.SortKeys();
+
+                _morphControllers.Add(controller);
+            }
+
+            Dictionary<string, VmdIkController> ikCtrlMap = [];
+            foreach (VmdIk ik in vmd.Iks)
+            {
+                foreach (IGrouping<string, VmdIk.Info> ikInfo in ik.Infos.GroupBy(item => item.Name))
+                {
+                    if (!ikCtrlMap.TryGetValue(ikInfo.Key, out VmdIkController? ikCtrl))
                     {
-                        continue;
+                        MMDIkSolver? mmdIk = Model.FindIkSolver(item => item.IkNode!.Name == ikInfo.Key);
+
+                        if (mmdIk == null)
+                        {
+                            continue;
+                        }
+
+                        ikCtrl = new VmdIkController(mmdIk);
+
+                        ikCtrlMap.Add(ikInfo.Key, ikCtrl);
                     }
 
-                    ikCtrl = new VmdIkController(mmdIk);
+                    foreach (VmdIk.Info info in ikInfo)
+                    {
+                        ikCtrl.AddKey(new VmdIkAnimationKey((int)ik.Frame, info.Enable));
+                    }
 
-                    ikCtrlMap.Add(ikInfo.Key, ikCtrl);
+                    ikCtrl.SortKeys();
                 }
-
-                foreach (VmdIk.Info info in ikInfo)
-                {
-                    ikCtrl.AddKey(new VmdIkAnimationKey((int)ik.Frame, info.Enable));
-                }
-
-                ikCtrl.SortKeys();
             }
+
+            _ikControllers.AddRange(ikCtrlMap.Values);
+
+            MaxKeyTime = CalculateMaxKeyTime();
+
+            return true;
         }
-        _ikControllers.AddRange(ikCtrlMap.Values);
 
-        MaxKeyTime = CalculateMaxKeyTime();
+        if (Path.GetExtension(path) == ".json")
+        {
+            JsonParsing? vmd = JsonParsing.ParsingByFile(path);
+            if (vmd == null)
+            {
+                return false;
+            }
 
-        return true;
+            foreach (IGrouping<string, JsonMotion> group in vmd.Motions.GroupBy(item => item.BoneName))
+            {
+                MMDNode? node = Model.FindNode(item => item.Name == group.Key);
+
+                if (node == null)
+                {
+                    continue;
+                }
+
+                VmdNodeController controller = new(node);
+
+                foreach (JsonMotion motion in group)
+                {
+                    controller.AddKey(new VmdNodeAnimationKey(motion));
+                }
+
+                controller.SortKeys();
+
+                _nodeControllers.Add(controller);
+            }
+
+            foreach (IGrouping<string, JsonMorph> group in vmd.Morphs.GroupBy(item => item.BlendShapeName))
+            {
+                MMDMorph? mmdMorph = Model.FindMorph(item => item.Name == group.Key);
+
+                if (mmdMorph == null)
+                {
+                    continue;
+                }
+
+                VmdMorphController controller = new(mmdMorph);
+
+                foreach (JsonMorph morph in group)
+                {
+                    controller.AddKey(new VmdMorphAnimationKey((int)morph.Frame, morph.Weight));
+                }
+
+                controller.SortKeys();
+
+                _morphControllers.Add(controller);
+            }
+
+            Dictionary<string, VmdIkController> ikCtrlMap = [];
+            foreach (JsonIk ik in vmd.Iks)
+            {
+                foreach (IGrouping<string, JsonIk.Info> ikInfo in ik.Infos.GroupBy(item => item.Name))
+                {
+                    if (!ikCtrlMap.TryGetValue(ikInfo.Key, out VmdIkController? ikCtrl))
+                    {
+                        MMDIkSolver? mmdIk = Model.FindIkSolver(item => item.IkNode!.Name == ikInfo.Key);
+
+                        if (mmdIk == null)
+                        {
+                            continue;
+                        }
+
+                        ikCtrl = new VmdIkController(mmdIk);
+
+                        ikCtrlMap.Add(ikInfo.Key, ikCtrl);
+                    }
+
+                    foreach (JsonIk.Info info in ikInfo)
+                    {
+                        ikCtrl.AddKey(new VmdIkAnimationKey((int)ik.Frame, info.Enable));
+                    }
+
+                    ikCtrl.SortKeys();
+                }
+            }
+
+            _ikControllers.AddRange(ikCtrlMap.Values);
+
+            MaxKeyTime = CalculateMaxKeyTime();
+
+            return true;
+        }
+
+        return false;
     }
 
     public void Evaluate(float t, float weight = 1.0f)

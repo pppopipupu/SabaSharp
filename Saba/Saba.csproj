@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Evergine.Bullet" Version="2023.9.28.1837" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Silk.NET.OpenCL" Version="2.20.0" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
 	</ItemGroup>

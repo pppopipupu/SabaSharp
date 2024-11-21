@@ -1,9 +1,11 @@
 ﻿using System.Numerics;
+using Newtonsoft.Json.Linq;
 using Saba.Helpers;
 
 namespace Saba;
 
 #region Classes
+
 public abstract class VmdAnimationKey(int time)
 {
     public int Time { get; } = time;
@@ -17,11 +19,20 @@ public class VmdBezier
 
     public VmdBezier(byte[] cp)
     {
-        int x0 = cp[0];
-        int y0 = cp[4];
-        int x1 = cp[8];
-        int y1 = cp[12];
+        int x0 = cp[0]; //20
+        int y0 = cp[4]; //20
+        int x1 = cp[8]; //107
+        int y1 = cp[12]; //107
+        Cp1 = new Vector2(x0 / 127.0f, y0 / 127.0f);
+        Cp2 = new Vector2(x1 / 127.0f, y1 / 127.0f);
+    }
 
+    public VmdBezier(JToken interpolationData)
+    {
+        float x0 = (float)interpolationData["start"][0];
+        float y0 = (float)interpolationData["start"][1];
+        float x1 = (float)interpolationData["end"][0];
+        float y1 = (float)interpolationData["end"][1];
         Cp1 = new Vector2(x0 / 127.0f, y0 / 127.0f);
         Cp2 = new Vector2(x1 / 127.0f, y1 / 127.0f);
     }
@@ -72,6 +83,7 @@ public class VmdBezier
             {
                 start = t;
             }
+
             t = (stop + start) * 0.5f;
             x = EvalX(t);
         }
@@ -97,15 +109,31 @@ public class VmdNodeAnimationKey : VmdAnimationKey
     public VmdNodeAnimationKey(VmdMotion motion) : base((int)motion.Frame)
     {
         Translate = motion.Translate * new Vector3(1.0f, 1.0f, -1.0f);
-
+        Console.WriteLine(motion.Quaternion);
         Matrix4x4 rot0 = Matrix4x4.CreateFromQuaternion(motion.Quaternion);
         Matrix4x4 rot1 = rot0.InvZ();
         Rotate = Quaternion.CreateFromRotationMatrix(rot1);
-
+     
         TxBezier = new VmdBezier(motion.Interpolation[0..]);
         TyBezier = new VmdBezier(motion.Interpolation[1..]);
         TzBezier = new VmdBezier(motion.Interpolation[2..]);
         RotBezier = new VmdBezier(motion.Interpolation[3..]);
+    }
+
+    public VmdNodeAnimationKey(JsonMotion motion) : base((int)motion.Frame)
+    {
+        Translate = motion.Translate * new Vector3(1.0f, 1.0f, -1.0f);
+        Console.WriteLine(motion.Quaternion);
+        Matrix4x4 rot0 = Matrix4x4.CreateFromQuaternion(motion.Quaternion);
+        Matrix4x4 rot1 = rot0.InvZ();
+        Rotate = Quaternion.CreateFromRotationMatrix(rot1);
+
+        JObject interpolation = (JObject)motion.Interpolation;
+
+        TxBezier = new VmdBezier(interpolation["X"]);
+        TyBezier = new VmdBezier(interpolation["Y"]);
+        TzBezier = new VmdBezier(interpolation["Z"]);
+        RotBezier = new VmdBezier(interpolation["Rotation"]);
     }
 }
 
@@ -118,6 +146,7 @@ public class VmdIkAnimationKey(int time, bool enable) : VmdAnimationKey(time)
 {
     public bool Enable { get; } = enable;
 }
+
 #endregion
 
 public abstract class VmdAnimationController<TKey, TObject>(TObject @object) where TKey : VmdAnimationKey
