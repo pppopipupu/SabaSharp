@@ -22,7 +22,7 @@ public class Scene1 : Game
         {
             _characterModels.Add(new MikuMikuDance(gl,
                 "Resources/古明地こいしVer1.51/古明地こいしVer1.51.pmx".FormatFilePath(),
-                "Resources/大喜/动作数据/god.json".FormatFilePath()));
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)+"/ChatMMD/motion.json".FormatFilePath()));
             foreach (var mmd in _characterModels)
             {
                 mmd.IsPlaying = true;

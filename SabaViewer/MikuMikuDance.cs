@@ -86,7 +86,7 @@ public unsafe class MikuMikuDance : IDisposable
             if (animTime * 30.0f > FrameCount+20 && isLoop)
             {
                 uint frameCount = 0;
-                animation.Load("Resources/大喜/动作数据/god.json".FormatFilePath(), model,out frameCount);
+                animation.Load(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)+"/ChatMMD/motion.json".FormatFilePath(), model,out frameCount);
                 FrameCount = frameCount;
                 animTime = 0;
 
