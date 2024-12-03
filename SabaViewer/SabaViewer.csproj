@@ -187,6 +187,15 @@
 		<None Update="Resources\大喜\模型\登门喜鹊泠鸢yousa-ver2.0\泠鸢yousa登门喜鹊153cm-Apose2.1完整版%282%29.pmx">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Remove="Resources\KizunaAI_ver1.01\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Resources\KizunaAI_ver1.01\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Remove="Resources\KizunaAI_ver1.01\**" />
 	</ItemGroup>
 
 </Project>
