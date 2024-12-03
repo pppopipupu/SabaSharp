@@ -1,4 +1,5 @@
 # SabaSharp
+这个分支是用于[ChatMMD]("https://github.com/pppopipupu/ChatMMD")的，添加了加载json动画的功能<br>
 这是一款基于 .NET 8 的跨平台 MikuMikuDance 渲染器，支持 Windows、Linux、macOS 等系统。
 
 ## 技术实现
